@@ -1,7 +1,4 @@
 .env
 .venv/
 __pycache__/
-*.py[cod]
-
-# Local resume files may contain personal information.
-resume/*.pdf
+*.pyc
