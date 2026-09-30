@@ -1,3 +1,4 @@
+
 import os
 import smtplib
 
@@ -7,8 +8,8 @@ from email.mime.application import MIMEApplication
 
 from langchain.tools import tool
 from resume_selector import select_resume
-
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -26,6 +27,9 @@ def send_email_by_gmail(
     body_text: str,
     attachment_path: str = None
 ):
+    """
+    Send an email through Gmail SMTP.
+    """
 
     message = MIMEMultipart()
 
@@ -33,11 +37,20 @@ def send_email_by_gmail(
     message["To"] = to
     message["Subject"] = subject
 
-    # Email body
-    message.attach(MIMEText(body_text, "plain"))
+    
+    message.attach(
+        MIMEText(body_text, "plain")
+    )
 
-    # Attach resume
+    
+
     if attachment_path:
+
+        if not isinstance(attachment_path, (str, bytes, os.PathLike)):
+            raise TypeError(
+                f"attachment_path must be a file path, "
+                f"but received: {type(attachment_path).__name__}"
+            )
 
         if not os.path.exists(attachment_path):
             raise FileNotFoundError(
@@ -97,17 +110,64 @@ def send_email(
     job_description: str = ""
 ):
     """
-    Send an email with the appropriate resume attached.
+    Send a professional email with the appropriate resume attached.
 
-    The resume is selected automatically based on the job description.
+    The resume is automatically selected based on the
+    job description, subject, and email body.
     """
 
-    # Select resume
-    resume_path = select_resume(
-        subject + "\n" + body + "\n" + job_description
+    combined_text = (
+        subject
+        + "\n"
+        + body
+        + "\n"
+        + job_description
     )
 
-    # Send email
+    resume_info = select_resume(
+        combined_text
+    )
+
+    if resume_info is None:
+
+        send_email_by_gmail(
+            to=to,
+            subject=subject,
+            body_text=body,
+            attachment_path=None
+        )
+
+        return (
+            "Email sent successfully without a resume "
+            "because no suitable resume was detected."
+        )
+
+    
+
+    resume_path = resume_info["resume"]
+
+    
+    print(
+        "Selected role:",
+        resume_info["role"]
+    )
+
+    print(
+        "Resume score:",
+        resume_info["score"]
+    )
+
+    print(
+        "Matched keywords:",
+        resume_info["matched_keywords"]
+    )
+
+    print(
+        "Resume path:",
+        resume_path
+    )
+
+    
     send_email_by_gmail(
         to=to,
         subject=subject,
@@ -115,13 +175,15 @@ def send_email(
         attachment_path=resume_path
     )
 
-    if resume_path:
-        return (
-            f"Email sent successfully with resume: "
-            f"{os.path.basename(resume_path)}"
-        )
+    return (
+        "Email sent successfully with resume: "
+        f"{os.path.basename(resume_path)} "
+        f"(Role: {resume_info['role']}, "
+        f"Score: {resume_info['score']})"
+    )
 
-    return "Email sent successfully without a resume."
 
 
-ALL_TOOLS = [send_email]
+ALL_TOOLS = [
+    send_email
+]
