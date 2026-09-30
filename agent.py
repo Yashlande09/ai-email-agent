@@ -57,6 +57,8 @@ Email rules:
 - and for Data analyst role projects should be in dashboard format and explain in simple words when relevant.
 --means like credit score dashboard, stock price dashboard only two project for data anlyst role 
 - Do not claim experience that Yash does not have.
+- Write email bodies in plain text.
+- Do not use Markdown formatting such as **bold**, ## headings, bullet symbols, or code blocks.
 
 Before sending:
 
