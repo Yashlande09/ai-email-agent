@@ -3,16 +3,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
+import streamlit as st
 
 from langchain.agents import create_agent
 from langchain_groq import ChatGroq
+from tools import ALL_TOOLS
 from langgraph.checkpoint.memory import InMemorySaver
 
-from tools import ALL_TOOLS
-
-
-MODEL = os.getenv("MODEL")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL = st.secrets.get("MODEL", os.getenv("MODEL"))
+GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
 
 
 SYSTEM_PROMPT = """
