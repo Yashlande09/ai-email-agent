@@ -4,11 +4,11 @@ import re
 RESUME_FOLDER = "resume"
 
 RESUMES = {
-    "data_analyst": os.path.join(
-        RESUME_FOLDER, "Yash_Lande_Resume_Data Analyst.pdf"
+   "data_analyst": os.path.join(
+    RESUME_FOLDER, "Yash_Lande_Resume_Data_Analyst.pdf"
     ),
     "data_scientist": os.path.join(
-        RESUME_FOLDER, "Yash_Lande_Resume_Data science.pdf"
+        RESUME_FOLDER, "Yash_Lande_Resume_Data Science.pdf"
     ),
     "data_engineer": os.path.join(
         RESUME_FOLDER, "Yash_Lande_Resume_Data Engineer.pdf"
