@@ -1,41 +1,57 @@
-
 import os
-
+import re
 
 RESUME_FOLDER = "resume"
 
-
 RESUMES = {
     "data_analyst": os.path.join(
-        RESUME_FOLDER,
-        "Yash_Lande_Resume_Data Analyst.pdf"
+        RESUME_FOLDER, "Yash_Lande_Resume_Data Analyst.pdf"
     ),
-
     "data_scientist": os.path.join(
-        RESUME_FOLDER,
-        "Yash_Lande_Resume_Data science.pdf"
+        RESUME_FOLDER, "Yash_Lande_Resume_Data science.pdf"
     ),
-
     "data_engineer": os.path.join(
-        RESUME_FOLDER,
-        "Yash_Lande_Resume_Data Engineer.pdf"
+        RESUME_FOLDER, "Yash_Lande_Resume_Data Engineer.pdf"
     ),
-
     "backend": os.path.join(
-        RESUME_FOLDER,
-        "Yash_Lande_Resume_Backend_1.pdf"
+        RESUME_FOLDER, "Yash_Lande_Resume_Backend_1.pdf"
     ),
-
     "ai_ml": os.path.join(
-        RESUME_FOLDER,
-        "Yash_Lande_Resume_AIML.pdf"
-    )
+        RESUME_FOLDER, "Yash_Lande_Resume_AIML.pdf"
+    ),
 }
 
+ROLE_TITLES = {
+    "ai_ml": [
+        "ai engineer",
+        "ai/ml engineer",
+        "artificial intelligence engineer",
+        "generative ai engineer",
+        "genai engineer",
+        "llm engineer",
+        "machine learning engineer",
+    ],
+    "data_scientist": [
+        "data scientist",
+        "data science",
+    ],
+    "data_engineer": [
+        "data engineer",
+        "junior data engineer",
+        "data engineering",
+    ],
+    "data_analyst": [
+        "data analyst",
+        "business analyst",
+    ],
+    "backend": [
+        "python developer",
+        "backend developer",
+        "backend engineer",
+    ],
+}
 
-# Higher number = stronger indication of that role
 KEYWORDS = {
-
     "data_analyst": {
         "data analyst": 10,
         "business analyst": 5,
@@ -47,8 +63,6 @@ KEYWORDS = {
         "business intelligence": 7,
         "reporting": 4,
     },
-
-
     "data_scientist": {
         "data scientist": 10,
         "data science": 8,
@@ -61,8 +75,6 @@ KEYWORDS = {
         "xgboost": 5,
         "model development": 5,
     },
-
-
     "data_engineer": {
         "data engineer": 10,
         "junior data engineer": 12,
@@ -85,8 +97,6 @@ KEYWORDS = {
         "sql": 2,
         "python": 2,
     },
-
-
     "backend": {
         "python developer": 10,
         "backend developer": 10,
@@ -99,18 +109,16 @@ KEYWORDS = {
         "api development": 7,
         "backend": 5,
     },
-
-
     "ai_ml": {
-        # VERY strong AI Engineer indicators
         "ai engineer": 15,
         "ai/ml engineer": 15,
         "artificial intelligence engineer": 15,
         "generative ai engineer": 15,
+        "genai engineer": 15,
         "llm engineer": 15,
-
-        # Strong GenAI indicators
+        "machine learning engineer": 15,
         "generative ai": 12,
+        "genai": 12,
         "large language model": 12,
         "large language models": 12,
         "llm": 12,
@@ -121,14 +129,10 @@ KEYWORDS = {
         "ai agents": 12,
         "agentic ai": 12,
         "agentic": 10,
-
-        # AI frameworks
         "langchain": 10,
         "langgraph": 10,
         "llamaindex": 9,
         "llama index": 9,
-
-        # Other AI technologies
         "prompt engineering": 8,
         "vector database": 8,
         "vector databases": 8,
@@ -138,43 +142,61 @@ KEYWORDS = {
         "openai": 6,
         "fine tuning": 7,
         "fine-tuning": 7,
-
-        # General ML
         "machine learning": 3,
         "deep learning": 3,
-    }
+    },
 }
 
+def normalize_text(text):
+    text = text.lower()
+    text = text.replace("-", " ")
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
 def select_resume(job_text):
+    if not job_text:
+        return None
 
-    text = job_text.lower()
+    text = normalize_text(job_text)
+    title_matches = {}
+
+    for role, titles in ROLE_TITLES.items():
+        for title in titles:
+            normalized_title = normalize_text(title)
+
+            if normalized_title in text:
+                title_matches[role] = title
+                break
+
+    if len(title_matches) == 1:
+        role = next(iter(title_matches))
+
+        return {
+            "role": role,
+            "score": 100,
+            "matched_keywords": [title_matches[role]],
+            "resume": RESUMES[role]
+        }
 
     scores = {}
     matched_keywords = {}
 
-    # Calculate weighted scores
     for role, keywords in KEYWORDS.items():
-
         score = 0
         matches = []
 
         for keyword, weight in keywords.items():
+            normalized_keyword = normalize_text(keyword)
 
-            if keyword in text:
+            if normalized_keyword in text:
                 score += weight
                 matches.append(keyword)
 
         scores[role] = score
         matched_keywords[role] = matches
 
-    # Find highest scoring role
-    best_role = max(
-        scores,
-        key=scores.get
-    )
+    best_role = max(scores, key=scores.get)
 
-    # No relevant role detected
     if scores[best_role] == 0:
         return None
 
